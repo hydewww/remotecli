@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -93,8 +94,10 @@ func TestConfigRoundTripAndPermissions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mode := info.Mode().Perm(); mode != 0o600 {
-		t.Fatalf("config mode %o, want 600", mode)
+	if runtime.GOOS != "windows" {
+		if mode := info.Mode().Perm(); mode != 0o600 {
+			t.Fatalf("config mode %o, want 600", mode)
+		}
 	}
 	if err := deleteConfig(); err != nil {
 		t.Fatal(err)
@@ -175,7 +178,22 @@ func TestRunnerResolvesRelativeOpenCLIPathBeforeChangingDirectory(t *testing.T) 
 	}
 	relative, err := filepath.Rel(cwd, path)
 	if err != nil {
-		t.Fatal(err)
+		if runtime.GOOS != "windows" {
+			t.Fatal(err)
+		}
+		originalCWD := cwd
+		if err := os.Chdir(filepath.Dir(path)); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _ = os.Chdir(originalCWD) })
+		cwd, err = os.Getwd()
+		if err != nil {
+			t.Fatal(err)
+		}
+		relative, err = filepath.Rel(cwd, path)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 	runner, err := NewRunner(RunnerOptions{OpenCLIPath: filepath.Join(".", relative), RunRoot: t.TempDir(), CommandTimeout: 10 * time.Second})
 	if err != nil {
