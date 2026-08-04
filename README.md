@@ -1,5 +1,7 @@
 # RemoteCLI
 
+[中文说明 / Chinese README](README.zh-CN.md)
+
 RemoteCLI is a small cross-platform process proxy for [OpenCLI]. It does not
 embed or reimplement OpenCLI. The server starts the local `opencli` executable
 as a child process, so the child keeps the server user's HOME, `~/.opencli`,
