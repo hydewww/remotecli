@@ -195,7 +195,8 @@ func TestRunnerResolvesRelativeOpenCLIPathBeforeChangingDirectory(t *testing.T) 
 			t.Fatal(err)
 		}
 	}
-	runner, err := NewRunner(RunnerOptions{OpenCLIPath: filepath.Join(".", relative), RunRoot: t.TempDir(), CommandTimeout: 10 * time.Second})
+	configuredPath := "." + string(filepath.Separator) + relative
+	runner, err := NewRunner(RunnerOptions{OpenCLIPath: configuredPath, RunRoot: t.TempDir(), CommandTimeout: 10 * time.Second})
 	if err != nil {
 		t.Fatal(err)
 	}
